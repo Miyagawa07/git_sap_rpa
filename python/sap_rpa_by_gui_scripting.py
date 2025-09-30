@@ -72,12 +72,13 @@ def _get_vbscript_path(params:dict):
     """
     try:
         file_name = params["SCRIPT_FILE"]
-        abs_path = os.path.abspath(__file__)
-        parent_dir = os.path.dirname(os.path.dirname(abs_path))
-        script_directory = str(parent_dir).replace(os.sep, '/')
-        os.makedirs(script_directory, exist_ok=True)
-        script_path = f'{script_directory}/scripts/{file_name}'
-        return script_path
+        exe_dir = os.path.dirname(sys.executable) # 実行時のカレントディレクトリ（Execute.batがある場所）
+        scripts_path = os.path.join(exe_dir, "..", "scripts") # pythonフォルダの1つ上の階層にある scripts フォルダを参照
+        scripts_path = os.path.abspath(scripts_path) # 絶対パスに変換
+        script_path = os.path.join(scripts_path, file_name) # scriptフォルダの中にある、指定されたFile_nameのパスを作成
+        script_path = Path(script_path) # Pathオブジェクトに変更
+        if not script_path.exists():
+           raise FileNotFoundError(f"VBSファイルが見つかりません: {script_path}")
 
     except Exception as e:
         logger.error('Failed to get vbscript path')
